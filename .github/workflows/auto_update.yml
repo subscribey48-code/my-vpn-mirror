@@ -1,0 +1,36 @@
+name: Update VPN Daily
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Jalan Setiap Jam (Menit ke-0)
+  workflow_dispatch: # Biar bisa diklik manual juga
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write # PENTING: Izinkan script nulis ke repo
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Run Downloader
+        run: python fetch_vpn.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add vpngate.csv
+          git commit -m "Auto-update VPN list" || exit 0
+          git push
